@@ -53,9 +53,9 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
     }                                                                                 
 }
 
-__global__ void time_step_1(real_t *acceleration_x, real_t *mass_0, real_t *velocity_x, int_t N);
+__global__ void time_step_1(real_t *acceleration_x, real_t *mass_0, real_t *velocity_x, int_t N, real_t *d_mass_velocity_x_0);
 __global__ void time_step_2(real_t *mass_velocity_x_0, real_t *mass_velocity_x_1, real_t *acceleration_x, real_t *mass_0, real_t *mass_1, real_t *velocity_x, real_t dx, real_t dt, int_t N);
-__device__ void boundary_condition( real_t *domain_variable, int sign );
+__device__ void boundary_condition( real_t *domain_variable, int sign, int_t N);
 void domain_init ( void );
 void domain_save ( int_t iteration );
 void domain_finalize ( void );
@@ -99,7 +99,7 @@ main ( int argc, char **argv )
         //time_step_1(h_acceleration_x, h_mass[0], h_velocity_x, N);
         //time_step_2(h_mass_velocity_x[0], h_mass_velocity_x[1], h_acceleration_x, h_mass[0], h_mass[1], h_velocity_x, dx, dt, N);
 
-        time_step_1<<<1,1>>>(d_acceleration_x, d_mass_0, d_velocity_x, N);
+        time_step_1<<<1,1>>>(d_acceleration_x, d_mass_0, d_velocity_x, N, d_mass_velocity_x_0);
         time_step_2<<<1,1>>>(d_mass_velocity_x_0, d_mass_velocity_x_1, d_acceleration_x, d_mass_0, d_mass_1, d_velocity_x, dx, dt, N);
 
         if ( iteration % snapshot_frequency == 0 )
@@ -136,19 +136,19 @@ main ( int argc, char **argv )
 }
 
 // TODO #1.5: Change the host-side function to be a device-side function
-__device__ void boundary_condition ( real_t *domain_variable, int sign )
+__device__ void boundary_condition ( real_t *domain_variable, int sign, int_t N )
 {
     #define VAR(x) domain_variable[(x)]
     VAR(   0 ) = sign*VAR( 2   );
-    VAR( 1024+1 ) = sign*VAR( 1024-1 );
+    VAR( N+1 ) = sign*VAR( N-1 );
     #undef VAR
 }
 
 // TODO #1.4: Change the function to be a CUDA kernel
-__global__ void time_step_1(real_t *acceleration_x, real_t *mass_0, real_t *velocity_x, int_t N)
+__global__ void time_step_1(real_t *acceleration_x, real_t *mass_0, real_t *velocity_x, int_t N, real_t *d_mass_velocity_x_0)
 {
-    boundary_condition(mass_0, 1);
-    boundary_condition(mass_0, -1);
+    boundary_condition(mass_0, 1, N);
+    boundary_condition(d_mass_velocity_x_0, -1, N);
 
     // TODO #2.1: Define the global index
     // TODO #2.3: Restrict the boundary_condition updates to only be performed by the first and last thread
