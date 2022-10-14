@@ -228,14 +228,14 @@ domain_init ( void )
 
     // TODO #1.3: Transfer the host-side data to the device.
 
-    cudaMemcpy(h_mass[0], d_mass_0, (N+2) * sizeof(real_t), cudaMemcpyHostToDevice);
-    cudaMemcpy(h_mass[1], d_mass_1, (N+2) * sizeof(real_t), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_mass_0, h_mass[0], (N+2) * sizeof(real_t), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_mass_1, h_mass[1], (N+2) * sizeof(real_t), cudaMemcpyHostToDevice);
 
-    cudaMemcpy(h_mass_velocity_x[0], d_mass_velocity_x_0, (N+2) * sizeof(real_t), cudaMemcpyHostToDevice);
-    cudaMemcpy(h_mass_velocity_x[1], d_mass_velocity_x_1, (N+2) * sizeof(real_t), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_mass_velocity_x_0, h_mass_velocity_x[0], (N+2) * sizeof(real_t), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_mass_velocity_x_1, h_mass_velocity_x[1], (N+2) * sizeof(real_t), cudaMemcpyHostToDevice);
 
-    cudaMemcpy(h_velocity_x,     d_velocity_x,     (N+2) * sizeof(real_t), cudaMemcpyHostToDevice);
-    cudaMemcpy(h_acceleration_x, d_acceleration_x, (N+2) * sizeof(real_t), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_velocity_x,     h_velocity_x,     (N+2) * sizeof(real_t), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_acceleration_x, h_acceleration_x, (N+2) * sizeof(real_t), cudaMemcpyHostToDevice);
 }
 
 void
